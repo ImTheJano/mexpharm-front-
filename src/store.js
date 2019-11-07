@@ -85,7 +85,14 @@ export default new Vuex.Store({
 				alertify.confirm('¿Todos los datos son correctos?',
 					async function(){
 						context.commit('addRow',{row})
-						let res=await axios.post('http://'+context.state.config.backEndHost+':'+context.state.config.backEndPort+'/data/write',{db:context.state.db},{ useCredentails: true })
+						// let res=await axios.post('http://'+context.state.config.backEndHost+':'+context.state.config.backEndPort+'/data/write',{db:context.state.db},{ useCredentails: true })
+						// if(res.status==200){
+						// 	alertify.success('Se a guardado el registro en la base de datos')
+						// 	context.commit('incremetClaveInst')
+						// }else{
+						// 	alertify.error('Ha ocurrido un error con la base de datos, asegurese de que el back este funcionando')
+						// }
+						let res=await axios.post('http://'+context.state.config.backEndHost+':'+context.state.config.backEndPort+'/patients',row,{ useCredentails: true })
 						if(res.status==200){
 							alertify.success('Se a guardado el registro en la base de datos')
 							context.commit('incremetClaveInst')

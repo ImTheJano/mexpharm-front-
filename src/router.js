@@ -6,6 +6,7 @@ import RegisterForm from './views/RegisterForm.vue'
 import Settings from './views/Settings.vue'
 import Data from './views/Data.vue'
 import Export from './views/Export.vue'
+import AfterForm from './views/AfterForm.vue'
 
 Vue.use(Router)
 
@@ -39,6 +40,11 @@ const routes= [
     path: '/about',
     name: 'Acerca de',
     component: About
+  },
+  {
+    path: '/otro',
+    name: 'Otro link',
+    component: AfterForm
   },
 ]
 const router=new Router({routes})
