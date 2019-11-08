@@ -2,7 +2,6 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import axios from 'axios'
 import * as alertify from 'alertify.js';
-import {router} from './router'
 import XLSX from 'xlsx'
 import { saveAs } from 'file-saver';
 Vue.use(Vuex)
@@ -15,7 +14,6 @@ export default new Vuex.Store({
 			backEndHost:'localhost',
 			backEndPort:'3000',
 		},
-		db:{rows:{}}
 	},
 	mutations: {
 		setClaveInst(state,payload){
@@ -44,109 +42,59 @@ export default new Vuex.Store({
 			state.config.backEndHost=payload.config.backEndHost
 			state.config.backEndPort=payload.config.backEndPort
 		},
-		setDb(state,payload){
-			state.db.rows={}
-			state.db.rows=payload.db
-		},
-		addRow(state,payload){
-			let row=payload.row
-			state.db.rows[row.claveInst]=row
-		},
-		deleteRows(state){
-			state.db.rows={}
-		}
 	},
 	actions: {
-		loadDataBase: async function(context){
-			let res=await axios.get('http://'+context.state.config.backEndHost+':'+context.state.config.backEndPort+'/data/read',{ useCredentails: true })
-			let db=res.data.data.rows
-			if(db){
-				context.commit('setDb',{db})
-				if(db[context.state.config.claveInst]){
-					alertify.confirm('La clave institucional en curso ya esta usada en la base de datos, haga click en ok para cambiarla en configuración',
-						function(){router.push("settings")},
-						function(){alertify.error('Deberas cambiar la clave institucional en configuración, de lo contrario no podras almacenar nuevos registros')},
-					)
-				}
-				
-			}
-		},
 		loadSettings: async function({commit}){
 			if (typeof(Storage) !== "undefined") {
 				if(localStorage.getItem('mexpharm_config')!==null)
 					commit('setConfig',{config:JSON.parse(localStorage.getItem('mexpharm_config'))})
 			}
 		},
-		postRow: async function(context,row){
-			row=row.row	
-			if(context.state.db.rows[row.claveInst]){
-				alertify.alert('La clave institucional que esta intentando almacenar ya existe, intenta con otra')
-			}else{
+		postRow: async function(context,params){
+			let row=params.row
+			let res=await axios.get('http://'+context.state.config.backEndHost+':'+context.state.config.backEndPort+'/patients/'+JSON.stringify({codigoVerificador:row.codigoVerificador}),{ useCredentails: true })
+			if(res.data.length==0){
 				alertify.confirm('¿Todos los datos son correctos?',
 					async function(){
-						context.commit('addRow',{row})
-						// let res=await axios.post('http://'+context.state.config.backEndHost+':'+context.state.config.backEndPort+'/data/write',{db:context.state.db},{ useCredentails: true })
-						// if(res.status==200){
-						// 	alertify.success('Se a guardado el registro en la base de datos')
-						// 	context.commit('incremetClaveInst')
-						// }else{
-						// 	alertify.error('Ha ocurrido un error con la base de datos, asegurese de que el back este funcionando')
-						// }
-						let res=await axios.post('http://'+context.state.config.backEndHost+':'+context.state.config.backEndPort+'/patients',row,{ useCredentails: true })
+						res=await axios.post('http://'+context.state.config.backEndHost+':'+context.state.config.backEndPort+'/patients',row,{ useCredentails: true })
 						if(res.status==200){
 							alertify.success('Se a guardado el registro en la base de datos')
 							context.commit('incremetClaveInst')
-						}else{
-							alertify.error('Ha ocurrido un error con la base de datos, asegurese de que el back este funcionando')
-						}
-					},
-					function(){
-						alertify.error('No se ha guardado el registro')
-					},
-				)
-			}
-			
-		},
-		updateRow: async function(context,row){
-			row=row.row
-			if(context.state.db.rows[row.claveInst]){
-				alertify.confirm('¿Todos los datos son correctos?',
-					async function(){
-						context.commit('addRow',{row})
-						let res=await axios.post('http://'+context.state.config.backEndHost+':'+context.state.config.backEndPort+'/data/write',{db:context.state.db},{ useCredentails: true })
-						if(res.status==200){
-							alertify.success('Se a guardado el registro en la base de datos')
-							context.commit('incremetClaveInst')
-						}else{
-							alertify.error('Ha ocurrido un error con la base de datos, asegurese de que el back este funcionando')
-						}
+						}else alertify.error('Ha ocurrido un error con la base de datos, asegurese de que el back este funcionando')
 					},
 					function(){
 						alertify.error('No se ha guardado el registro')
 					},
 				)
 			}else{
-				alertify.alert('El registro que intenta editar no se encuentra en la base de datos')
+				alertify.error('Ya existe un registro con el mismo codigo verificador')
 			}
 		},
-		deleteAll: async function(context){
-			alertify.confirm('Los datos ya no podran ser recuperados ¿estas seguro?',
+		updateRow: async function(context,params){
+			let row=params.row
+			let id=params.id
+			let res=null
+			alertify.confirm('¿Todos los datos son correctos?',
 				async function(){
-					context.commit('deleteRows')
-					let res=await axios.post('http://'+context.state.config.backEndHost+':'+context.state.config.backEndPort+'/data/write',{db:context.state.db},{ useCredentails: true })
-					if(res.status==200){
-						alertify.success('Se han eliminado todos los registros de la base de datos')
-					}else{
-						alertify.error('Ha ocurrido un error con la base de datos, asegurese de que el back este funcionando')
-					}
+					res=await axios.put('http://'+context.state.config.backEndHost+':'+context.state.config.backEndPort+'/patients/'+id,row,{ useCredentails: true })
+						if(res.status==200) alertify.success('Se a actualzado el registro en la base de datos')
+						else alertify.error('Ha ocurrido un error con la base de datos, asegurese de que el back este funcionando')
 				},
 				function(){
 					alertify.error('No se ha guardado el registro')
 				},
-			)	
+			)
+			return res
 		},
-		exportToXls(context,{params}){
+		findRow:async function(context,body){
+			let res=await axios.get('http://'+context.state.config.backEndHost+':'+context.state.config.backEndPort+'/patients/'+JSON.stringify(body),{ useCredentails: true })
+			return res
+		},
+
+		async exportToXls(context,{params}){
+			let res=await axios.get('http://'+context.state.config.backEndHost+':'+context.state.config.backEndPort+'/patients/{}',{ useCredentails: true })
 			console.log('exportando...');
+			let data=res.data
 			var ws_data=[]
 			ws_data.push([
 				'CLAVE_MEXPHARM',
@@ -195,10 +143,8 @@ export default new Vuex.Store({
 				'OTRO_CUALES_ACTIVIDADES_RETOMADAS',
 				'NÚMERO_TELEFÓNICO',
 				'QUE_TAN_SATISFECHO_ESTÁ_CON_SU_CIRUGÍA'])
-			for (const _row in context.state.db.rows) {
-				if (context.state.db.rows.hasOwnProperty(_row)) {
-					const obj = context.state.db.rows[_row];
-					const row=[]
+				data.forEach(obj => {
+					let row=[]
 					row.push(obj.claveMexpharm)
 					row.push(obj.claveInst)
 					row.push(obj.codigoVerificador)
@@ -246,8 +192,62 @@ export default new Vuex.Store({
 					row.push(obj.telefono)
 					row.push(obj.satisfaccion)
 					ws_data.push(row)
-				}
-			}
+					console.log(row);
+					
+				});
+			// for (const _row in context.state.db.rows) {
+			// 	if (context.state.db.rows.hasOwnProperty(_row)) {
+			// 		const obj = context.state.db.rows[_row];
+			// 		const row=[]
+			// 		row.push(obj.claveMexpharm)
+			// 		row.push(obj.claveInst)
+			// 		row.push(obj.codigoVerificador)
+			// 		row.push(obj.anyo)
+			// 		row.push(obj.mes)
+			// 		row.push(obj.dia)
+			// 		row.push(obj.medicoResponsable)
+			// 		row.push(obj.medicoTratante)
+			// 		row.push(obj.nombre)
+			// 		row.push(obj.sexo)
+			// 		row.push(obj.edad)
+			// 		row.push(obj.rEdad)
+			// 		row.push(obj.edoCivil)
+			// 		row.push(obj.otroEdoCivil)
+			// 		row.push(obj.viveCon)
+			// 		row.push(obj.otroViveCon)
+			// 		row.push(obj.viveCuantos)
+			// 		row.push(obj.viviendaEs)
+			// 		row.push(obj.ingresoMensual)
+			// 		row.push(obj.nPersonasAportan)
+			// 		row.push(obj.localidad)
+			// 		row.push(obj.claveMunicipio)
+			// 		row.push(obj.municipio)
+			// 		row.push(obj.claveEFederativa)
+			// 		row.push(obj.eFederativa)
+			// 		row.push(obj.lugarNacimiento)
+			// 		row.push(obj.ocupacion)
+			// 		row.push(obj.actRemunerada)
+			// 		row.push(obj.actRemuneradaCual)
+			// 		row.push(obj.clacificacionOjo)
+			// 		row.push(obj.intervencionOjoD)
+			// 		row.push(obj.intervencionOjoI)
+			// 		row.push(obj.procedimiento)
+			// 		row.push(obj.observaciones)
+			// 		row.push(obj.complicacione)
+			// 		row.push(obj.sedeCamp)
+			// 		row.push(obj.insumos)
+			// 		row.push(obj.folioConsignia)
+			// 		row.push(obj.actAntesDeCirugia)
+			// 		row.push(obj.nActAntesDeCirugia)
+			// 		row.push(obj.oActAntesDeCirugia)
+			// 		row.push(obj.actDespuesDeCirugia)
+			// 		row.push(obj.nActDespuesDeCirugia)
+			// 		row.push(obj.oActDespuesDeCirugia)
+			// 		row.push(obj.telefono)
+			// 		row.push(obj.satisfaccion)
+			// 		ws_data.push(row)
+			// 	}
+			// }
 
 			let wb = XLSX.utils.book_new();
 			wb.props={Title:params.title,Author:params.author}

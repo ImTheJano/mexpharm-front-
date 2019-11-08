@@ -12,14 +12,10 @@
   export default {
     components:{navbar},
     methods: {
-      ...Vuex.mapActions(['loadSettings','loadDataBase','checkCurrentId','checkCurrentId'])
-    },
-    computed: {
-      ...Vuex.mapState(['config','db']),
+      ...Vuex.mapActions(['loadSettings'])
     },
     mounted() {
       this.loadSettings()
-      this.loadDataBase()
     },
   }
 </script>

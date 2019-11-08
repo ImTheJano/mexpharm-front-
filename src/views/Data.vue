@@ -9,8 +9,53 @@
 					</tr>
 				</thead>
 				<tbody>
-					<tr scope="row" v-for="row in db.rows" :key="row.claveInst" data-toggle="tooltip" data-placement="top" :title="row.nombre+', clave: '+row.claveInst">
-						<td scope="col" v-for="(val,i) in row" :key="i">{{val}}</td>
+					<tr scope="row" v-for="row in rows" :key="row.claveInst" data-toggle="tooltip" data-placement="top" :title="row.nombre+', clave: '+row.claveInst">
+						<td>{{row.claveMexpharm}}</td>
+						<td>{{row.claveInst}}</td>
+						<td>{{row.codigoVerificador}}</td>
+						<td>{{row.anyo}}</td>
+						<td>{{row.mes}}</td>
+						<td>{{row.dia}}</td>
+						<td>{{row.medicoResponsable}}</td>
+						<td>{{row.medicoTratante}}</td>
+						<td>{{row.nombre}}</td>
+						<td>{{row.sexo}}</td>
+						<td>{{row.edad}}</td>
+						<td>{{row.rEdad}}</td>
+						<td>{{row.edoCivil}}</td>
+						<td>{{row.otroEdoCivil}}</td>
+						<td>{{row.viveCon}}</td>
+						<td>{{row.otroViveCon}}</td>
+						<td>{{row.viveCuantos}}</td>
+						<td>{{row.viviendaEs}}</td>
+						<td>{{row.ingresoMensual}}</td>
+						<td>{{row.nPersonasAportan}}</td>
+						<td>{{row.localidad}}</td>
+						<td>{{row.claveMunicipio}}</td>
+						<td>{{row.municipio}}</td>
+						<td>{{row.claveEFederativa}}</td>
+						<td>{{row.eFederativa}}</td>
+						<td>{{row.lugarNacimiento}}</td>
+						<td>{{row.ocupacion}}</td>
+						<td>{{row.actRemunerada}}</td>
+						<td>{{row.actRemuneradaCual}}</td>
+						<td>{{row.clacificacionOjo}}</td>
+						<td>{{row.intervencionOjoD}}</td>
+						<td>{{row.intervencionOjoI}}</td>
+						<td>{{row.procedimiento}}</td>
+						<td>{{row.observaciones}}</td>
+						<td>{{row.complicacione}}</td>
+						<td>{{row.sedeCamp}}</td>
+						<td>{{row.insumos}}</td>
+						<td>{{row.folioConsignia}}</td>
+						<td>{{row.actAntesDeCirugia}}</td>
+						<td>{{row.nActAntesDeCirugia}}</td>
+						<td>{{row.oActAntesDeCirugia}}</td>
+						<td>{{row.actDespuesDeCirugia}}</td>
+						<td>{{row.nActDespuesDeCirugia}}</td>
+						<td>{{row.oActDespuesDeCirugia}}</td>
+						<td>{{row.telefono}}</td>
+						<td>{{row.satisfaccion}}</td>
 					</tr>
 				</tbody>
 			</table>
@@ -49,7 +94,9 @@ export default {
 	name:"Data",
 	data() {
 		return {
+			rows:[],
 			cols:[
+				"id",
 				"Clave Mexpharm",
 				"Clave inst",
 				"Código verificador",
@@ -100,6 +147,7 @@ export default {
 		}
 	},
 	mounted() {
+		this.loadData()
 		$jQuery('#table').DataTable({
 			"scrollY":"200px",
 			"scrollX": true,
@@ -115,11 +163,14 @@ export default {
 			}
 		});
 	},
-	computed: {
-		...Vuex.mapState(['db']),
-	},
+
 	methods:{
-		...Vuex.mapActions(['loadSettings','loadDataBase','checkCurrentId','checkCurrentId'])
-	}
+		...Vuex.mapActions(['loadSettings','checkCurrentId','findRow']),
+		async loadData(){
+			let res=await this.findRow({})
+			this.rows=res.data
+			
+		}
+	},
 }
 </script>

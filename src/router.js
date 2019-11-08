@@ -22,6 +22,11 @@ const routes= [
     component: RegisterForm
   },
   {
+    path: '/afterform',
+    name: 'Operación',
+    component: AfterForm
+  },
+  {
     path: '/data',
     name: 'Datos',
     component: Data
@@ -40,11 +45,6 @@ const routes= [
     path: '/about',
     name: 'Acerca de',
     component: About
-  },
-  {
-    path: '/otro',
-    name: 'Otro link',
-    component: AfterForm
   },
 ]
 const router=new Router({routes})
