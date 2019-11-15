@@ -7,6 +7,7 @@ import Settings from './views/Settings.vue'
 import Data from './views/Data.vue'
 import Export from './views/Export.vue'
 import AfterForm from './views/AfterForm.vue'
+import DeleteOne from './views/DeleteOne.vue'
 
 Vue.use(Router)
 
@@ -30,6 +31,11 @@ const routes= [
     path: '/data',
     name: 'Datos',
     component: Data
+  },
+  {
+    path: '/deleteOne',
+    name: 'Eliminar registro',
+    component: DeleteOne
   },
   {
     path: '/settings',

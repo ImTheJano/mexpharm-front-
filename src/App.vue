@@ -12,10 +12,11 @@
   export default {
     components:{navbar},
     methods: {
-      ...Vuex.mapActions(['loadSettings'])
+      ...Vuex.mapActions(['loadSettings','testBackEnd'])
     },
     mounted() {
       this.loadSettings()
+      this.testBackEnd()
     },
   }
 </script>

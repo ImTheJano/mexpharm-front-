@@ -90,7 +90,49 @@ export default new Vuex.Store({
 			let res=await axios.get('http://'+context.state.config.backEndHost+':'+context.state.config.backEndPort+'/patients/'+JSON.stringify(body),{ useCredentails: true })
 			return res
 		},
+		async deleteRow(context,id){
+			try {
+				let res=await axios.get('http://'+context.state.config.backEndHost+':'+context.state.config.backEndPort+'/patients/'+JSON.stringify({codigoVerificador:id}),{ useCredentails: true })
+				if(res.data){
+					let patient= res.data[0]
+					alertify.confirm('¿Estas seguro de que quieres eliminar el registro de '+patient.nombre+'?',
+						async function(){
+							try {								
+								await axios.delete('http://'+context.state.config.backEndHost+':'+context.state.config.backEndPort+'/patients/'+patient.codigoVerificador,{ useCredentails: true })
+								alertify.success('Se elimino el registro de '+patient.nombre)
+							} catch (error) {
+								alertify.error('No se pudo eliminar '+patient.nombre)
+							}
+						},
+						function(){
+							alertify.error('No se elimino ningun registro')
+						}
+					)
+				}else{
+					alertify.error('No se encontro nungun registro con tal codigo')
+				}
+				
+			} catch (error) {
+				alertify.error('No se pudo encontrar el registro')
+			}
+		},
+		async testBackEnd(context){
+			console.log();
+			try {
+				await axios.get('http://'+context.state.config.backEndHost+':'+context.state.config.backEndPort+'/testcnn',{ useCredentails: true })
+			} catch (error) {
+				alertify.confirm('No se logro establecer conexion con backend, inicie el servicio y vuelva a intentarlo',
+					function(){
+						location.reload()
+					},
+					function(){
+						alertify.error('No existe coneccion a backend')
+					}
+				)
+			}
 
+			
+		},
 		async exportToXls(context,{params}){
 			let res=await axios.get('http://'+context.state.config.backEndHost+':'+context.state.config.backEndPort+'/patients/{}',{ useCredentails: true })
 			console.log('exportando...');
@@ -143,112 +185,58 @@ export default new Vuex.Store({
 				'OTRO_CUALES_ACTIVIDADES_RETOMADAS',
 				'NÚMERO_TELEFÓNICO',
 				'QUE_TAN_SATISFECHO_ESTÁ_CON_SU_CIRUGÍA'])
-				data.forEach(obj => {
-					let row=[]
-					row.push(obj.claveMexpharm)
-					row.push(obj.claveInst)
-					row.push(obj.codigoVerificador)
-					row.push(obj.anyo)
-					row.push(obj.mes)
-					row.push(obj.dia)
-					row.push(obj.medicoResponsable)
-					row.push(obj.medicoTratante)
-					row.push(obj.nombre)
-					row.push(obj.sexo)
-					row.push(obj.edad)
-					row.push(obj.rEdad)
-					row.push(obj.edoCivil)
-					row.push(obj.otroEdoCivil)
-					row.push(obj.viveCon)
-					row.push(obj.otroViveCon)
-					row.push(obj.viveCuantos)
-					row.push(obj.viviendaEs)
-					row.push(obj.ingresoMensual)
-					row.push(obj.nPersonasAportan)
-					row.push(obj.localidad)
-					row.push(obj.claveMunicipio)
-					row.push(obj.municipio)
-					row.push(obj.claveEFederativa)
-					row.push(obj.eFederativa)
-					row.push(obj.lugarNacimiento)
-					row.push(obj.ocupacion)
-					row.push(obj.actRemunerada)
-					row.push(obj.actRemuneradaCual)
-					row.push(obj.clacificacionOjo)
-					row.push(obj.intervencionOjoD)
-					row.push(obj.intervencionOjoI)
-					row.push(obj.procedimiento)
-					row.push(obj.observaciones)
-					row.push(obj.complicacione)
-					row.push(obj.sedeCamp)
-					row.push(obj.insumos)
-					row.push(obj.folioConsignia)
-					row.push(obj.actAntesDeCirugia)
-					row.push(obj.nActAntesDeCirugia)
-					row.push(obj.oActAntesDeCirugia)
-					row.push(obj.actDespuesDeCirugia)
-					row.push(obj.nActDespuesDeCirugia)
-					row.push(obj.oActDespuesDeCirugia)
-					row.push(obj.telefono)
-					row.push(obj.satisfaccion)
-					ws_data.push(row)
-					console.log(row);
-					
-				});
-			// for (const _row in context.state.db.rows) {
-			// 	if (context.state.db.rows.hasOwnProperty(_row)) {
-			// 		const obj = context.state.db.rows[_row];
-			// 		const row=[]
-			// 		row.push(obj.claveMexpharm)
-			// 		row.push(obj.claveInst)
-			// 		row.push(obj.codigoVerificador)
-			// 		row.push(obj.anyo)
-			// 		row.push(obj.mes)
-			// 		row.push(obj.dia)
-			// 		row.push(obj.medicoResponsable)
-			// 		row.push(obj.medicoTratante)
-			// 		row.push(obj.nombre)
-			// 		row.push(obj.sexo)
-			// 		row.push(obj.edad)
-			// 		row.push(obj.rEdad)
-			// 		row.push(obj.edoCivil)
-			// 		row.push(obj.otroEdoCivil)
-			// 		row.push(obj.viveCon)
-			// 		row.push(obj.otroViveCon)
-			// 		row.push(obj.viveCuantos)
-			// 		row.push(obj.viviendaEs)
-			// 		row.push(obj.ingresoMensual)
-			// 		row.push(obj.nPersonasAportan)
-			// 		row.push(obj.localidad)
-			// 		row.push(obj.claveMunicipio)
-			// 		row.push(obj.municipio)
-			// 		row.push(obj.claveEFederativa)
-			// 		row.push(obj.eFederativa)
-			// 		row.push(obj.lugarNacimiento)
-			// 		row.push(obj.ocupacion)
-			// 		row.push(obj.actRemunerada)
-			// 		row.push(obj.actRemuneradaCual)
-			// 		row.push(obj.clacificacionOjo)
-			// 		row.push(obj.intervencionOjoD)
-			// 		row.push(obj.intervencionOjoI)
-			// 		row.push(obj.procedimiento)
-			// 		row.push(obj.observaciones)
-			// 		row.push(obj.complicacione)
-			// 		row.push(obj.sedeCamp)
-			// 		row.push(obj.insumos)
-			// 		row.push(obj.folioConsignia)
-			// 		row.push(obj.actAntesDeCirugia)
-			// 		row.push(obj.nActAntesDeCirugia)
-			// 		row.push(obj.oActAntesDeCirugia)
-			// 		row.push(obj.actDespuesDeCirugia)
-			// 		row.push(obj.nActDespuesDeCirugia)
-			// 		row.push(obj.oActDespuesDeCirugia)
-			// 		row.push(obj.telefono)
-			// 		row.push(obj.satisfaccion)
-			// 		ws_data.push(row)
-			// 	}
-			// }
-
+			data.forEach(obj => {
+				let row=[]
+				row.push(obj.claveMexpharm)
+				row.push(obj.claveInst)
+				row.push(obj.codigoVerificador)
+				row.push(obj.anyo)
+				row.push(obj.mes)
+				row.push(obj.dia)
+				row.push(obj.medicoResponsable)
+				row.push(obj.medicoTratante)
+				row.push(obj.nombre)
+				row.push(obj.sexo)
+				row.push(obj.edad)
+				row.push(obj.rEdad)
+				row.push(obj.edoCivil)
+				row.push(obj.otroEdoCivil)
+				row.push(obj.viveCon)
+				row.push(obj.otroViveCon)
+				row.push(obj.viveCuantos)
+				row.push(obj.viviendaEs)
+				row.push(obj.ingresoMensual)
+				row.push(obj.nPersonasAportan)
+				row.push(obj.localidad)
+				row.push(obj.claveMunicipio)
+				row.push(obj.municipio)
+				row.push(obj.claveEFederativa)
+				row.push(obj.eFederativa)
+				row.push(obj.lugarNacimiento)
+				row.push(obj.ocupacion)
+				row.push(obj.actRemunerada)
+				row.push(obj.actRemuneradaCual)
+				row.push(obj.clacificacionOjo)
+				row.push(obj.intervencionOjoD)
+				row.push(obj.intervencionOjoI)
+				row.push(obj.procedimiento)
+				row.push(obj.observaciones)
+				row.push(obj.complicacione)
+				row.push(obj.sedeCamp)
+				row.push(obj.insumos)
+				row.push(obj.folioConsignia)
+				row.push(obj.actAntesDeCirugia)
+				row.push(obj.nActAntesDeCirugia)
+				row.push(obj.oActAntesDeCirugia)
+				row.push(obj.actDespuesDeCirugia)
+				row.push(obj.nActDespuesDeCirugia)
+				row.push(obj.oActDespuesDeCirugia)
+				row.push(obj.telefono)
+				row.push(obj.satisfaccion)
+				ws_data.push(row)
+				console.log(row);
+				
+			});
 			let wb = XLSX.utils.book_new();
 			wb.props={Title:params.title,Author:params.author}
 			wb.SheetNames.push(params.sheet);

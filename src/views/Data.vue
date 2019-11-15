@@ -1,6 +1,16 @@
 <template>
 	<div>
 		<h4>Tabla de datos</h4>
+		<vueye-table 
+			checkable 
+			tableStyle="bordered" 
+			:theme="theme3" 
+			:per-page-values="[5,10,25,50]"
+			title="TODOS"  
+			:rows_data="todos" 
+			v-on:checked-rows="getChecked"
+			v-on:row-click="onrowclick"
+		></vueye-table>
 		<div class="table-responsive p-0">
 			<table id="table" class=" table table-bordered table-sm table-hover">
 				<thead>
@@ -88,15 +98,25 @@ import $jQuery from 'jquery'
 import Vuex from 'vuex'
 import 'datatables.net'
 import '../assets/css/dataTables.bootstrap4.min.css'
-//import '../assets/js/dataTables.bootstrap4.min.js'
+import VueyeTable from "vueye-datatable";
 export default {
-	components:{editForm},
+	components:{editForm,VueyeTable},
 	name:"Data",
 	data() {
 		return {
+			todos: [],
+			theme3: {
+				backgroundColor: "#141443",
+				color: "#eee",
+				rows:{
+					borderBottom: "1px solid #eee"
+				},
+				rowClick: {
+					backgroundColor: "#0D0B2F"
+				}
+			},
 			rows:[],
 			cols:[
-				"id",
 				"Clave Mexpharm",
 				"Clave inst",
 				"Código verificador",
@@ -169,6 +189,13 @@ export default {
 		async loadData(){
 			let res=await this.findRow({})
 			this.rows=res.data
+			
+		},
+		getChecked(rows){
+			console.log(rows);	
+		},
+		onrowclick(row){
+			console.log(row);
 			
 		}
 	},
