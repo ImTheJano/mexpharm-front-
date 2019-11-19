@@ -120,6 +120,10 @@
 			<h4>Datos socioeconomicos</h4>
 			<div class="form-row">
 				<div class="form-group col-12 col-md-6 col-lg-4">
+						<label>¿Con quién vive?</label>
+						<input type="text" class="form-control" v-model="cols.viveCon">
+					</div>
+				<div class="form-group col-12 col-md-6 col-lg-4">
 					<label>¿Con cuantas personas comparte vivienda?</label>
 					<input type="number" class="form-control" v-model="cols.viveCuantos">
 				</div>
