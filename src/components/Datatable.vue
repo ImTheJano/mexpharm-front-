@@ -2,6 +2,7 @@
 	<div class="container">
 		<label>buscar</label>
 		<input type="text" class="form-control" v-model="filterKey">
+		<button @click="loadData()" class="btn btn-success my-3">Actualizar</button>
 		<table class="table">
 			<thead>
 				<tr>
@@ -12,11 +13,11 @@
 			</thead>
 			<tbody>
 				<tr  v-for="(row) in filteredRows" :key="row._id">
-					<td><button class="btn btn-sm btn-outline-danger"><delete-icon title="Edtar" /></button></td>
-					<td><button class="btn btn-sm btn-outline-info"><pencil-icon title="Eliminar" /></button></td>
-					<td class="text-info">{{row.claveMexpharm}}</td>
+					<td><button @click="deleteOne(row.codigoVerificador)" class="btn btn-sm btn-outline-danger"><delete-icon title="Eliminar" /></button></td>
+					<td><button @click="selectedRow=row.codigoVerificador" class="btn btn-sm btn-outline-info" data-toggle="modal" data-target="#modal1"><pencil-icon title="Editar" /></button></td>
+					<td>{{row.claveMexpharm}}</td>
 					<td>{{row.claveInst}}</td>
-					<td>{{row.codigoVerificador}}</td>
+					<td class="text-info">{{row.codigoVerificador}}</td>
 					<td>{{row.anyo}}</td>
 					<td>{{row.mes}}</td>
 					<td>{{row.dia}}</td>
@@ -66,14 +67,33 @@
 
 			</tfoot>
 		</table>
+		<div class="modal fade" id="modal1" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<div class="container-fluid">
+							<editForm :cv="selectedRow"/>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
 </template>
 <script>
+import editForm from '../components/EditForm'
 import Vuex from 'vuex'
 export default {
+	components:{editForm},
     name:"Datatable",
     data(){
         return{
+			selectedRow:"",
 			filterKey:"",
             rows:[],
             cols:[
@@ -186,7 +206,10 @@ export default {
 		}
 	},
     methods:{
-		...Vuex.mapActions(['loadSettings','checkCurrentId','findRow']),
+		...Vuex.mapActions(['loadSettings','checkCurrentId','findRow','deleteRow']),
+		deleteOne(id){
+			this.deleteRow(id)
+		},
         async loadData(){
             let res=await this.findRow({})
             let _rows=[]

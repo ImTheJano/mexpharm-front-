@@ -54,18 +54,23 @@ export default new Vuex.Store({
 			let row=params.row
 			let res=await axios.get('http://'+context.state.config.backEndHost+':'+context.state.config.backEndPort+'/patients/'+JSON.stringify({codigoVerificador:row.codigoVerificador}),{ useCredentails: true })
 			if(res.data.length==0){
-				alertify.confirm('¿Todos los datos son correctos?',
-					async function(){
-						res=await axios.post('http://'+context.state.config.backEndHost+':'+context.state.config.backEndPort+'/patients',row,{ useCredentails: true })
-						if(res.status==200){
-							alertify.success('Se a guardado el registro en la base de datos')
-							context.commit('incremetClaveInst')
-						}else alertify.error('Ha ocurrido un error con la base de datos, asegurese de que el back este funcionando')
-					},
-					function(){
-						alertify.error('No se ha guardado el registro')
-					},
-				)
+				let res=await axios.get('http://'+context.state.config.backEndHost+':'+context.state.config.backEndPort+'/patients/'+JSON.stringify({claveInst:row.claveInst}),{ useCredentails: true })
+				if(res.data.length==0){
+					alertify.confirm('¿Todos los datos son correctos?',
+						async function(){
+							res=await axios.get('http://'+context.state.config.backEndHost+':'+context.state.config.backEndPort+'/patients/post/'+JSON.stringify(row),row,{ useCredentails: true })
+							if(res.status==200){
+								alertify.success('Se a guardado el registro en la base de datos')
+								context.commit('incremetClaveInst')
+							}else alertify.error('Ha ocurrido un error con la base de datos, asegurese de que el back este funcionando')
+						},
+						function(){
+							alertify.error('No se ha guardado el registro')
+						},
+					)
+				}else{
+					alertify.error('Ya existe un registro con la misma clave institucional')
+				}
 			}else{
 				alertify.error('Ya existe un registro con el mismo codigo verificador')
 			}

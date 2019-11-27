@@ -6,7 +6,7 @@
 			<div class="form-group col-12 col-md-12">
 				<label>Codigo verificador</label>
 				<div class="input-group">
-					<input type="text" class="form-control" v-model="cols.codigoVerificador" required>
+					<input type="text" class="form-control" v-model="selectedRow" required>
 					<div class="input-group-append">
 						<button @click="find()" class="btn btn-outline-secondary" type="button">Buscar</button>
 					</div>
@@ -17,16 +17,16 @@
 					<div class="form-group col-12 col-md-6">
 						<label>Clave institucional</label>
 						<div class="input-group">
-							<input type="text" class="form-control" :value="cols.claveInst" required>
+							<input type="text" class="form-control" v-model="cols.claveInst" required>
 						</div>
 					</div>
 					<div class="form-group col-6 col-md-6 col-lg-6">
 						<label>Clave Mexpharm</label>
-						<input type="text" class="form-control" :value="cols.claveMexpharm" required>
+						<input type="text" class="form-control" v-model="cols.claveMexpharm" required>
 					</div>
 					<div class="form-group col-6 col-md-6 col-lg-6">
 						<label>Sede de campaña</label>
-						<input type="text" class="form-control" :value="cols.sedeCamp" required>
+						<input type="text" class="form-control" v-model="cols.sedeCamp" required>
 					</div>
 					<div class="form-group col-6 col-md-6 col-lg-6">
 						<label>Médico tratante</label>
@@ -397,6 +397,7 @@ function findIndexInObjArr(arr,key,val){
 }
 export default {
 	name:'EditForm',
+	props:['cv'],
 	data(){
 		return {
 			found:false,
@@ -469,7 +470,10 @@ export default {
         },
         otherCheckAct(){
             return this.combos.checkAct.indexOf("Otro")!=-1
-        },
+		},
+		selectedRow(){
+			return this.cv
+		}
 	},
 	methods:{
 		...Vuex.mapActions(['updateRow','findRow']),
@@ -477,9 +481,9 @@ export default {
 			event.preventDefault();
 			if(this.found){
 				let row = {
-					claveMexpharm:this.config.claveMexpharm,
-					claveInst:this.config.claveInst,
-					sedeCamp:this.config.sedeCamp,
+					claveMexpharm:this.cols.claveMexpharm,
+					claveInst:this.cols.claveInst,
+					sedeCamp:this.cols.sedeCamp,
 					codigoVerificador:this.cols.codigoVerificador,
 					anyo:this.cols.anyo,
 					mes:this.cols.mes,
@@ -533,7 +537,7 @@ export default {
 			}
 		},
 		async find(){
-			let res=await this.findRow({codigoVerificador:this.cols.codigoVerificador});
+			let res=await this.findRow({codigoVerificador:this.selectedRow});
             if(res.data.length!=1){
                 alertify.error('No se ha encontrado el registro solicitado')
                 this.found=false
@@ -606,9 +610,23 @@ export default {
 				this.cols.municipio=dataSet[this.combos.entidad].municipios[this.combos.municipio].municipio
 			}
 		},
+		hideForm(){
+			this.found=false
+		}
 	},
 	mounted() {
 		this.combos.entidades=dataSet
+		this.cols.codigoVerificador=this.cv
+		let fHideForm=this.hideForm
+		$jQuery('#modal1').on('close.bs.modal', function () {
+			fHideForm()
+		});
+		$jQuery('#modal1').on('show.bs.modal', function () {
+			fHideForm()
+		});
+		$jQuery('#modal1').on('hidden.bs.modal', function () {
+			fHideForm()
+		});
 	},
 }
 </script>
