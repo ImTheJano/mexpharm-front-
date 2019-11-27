@@ -5,12 +5,16 @@
 		<table class="table">
 			<thead>
 				<tr>
+					<th>Eliminar</th>
+					<th>Edtar</th>
 					<th v-for="col in cols" :key="col">{{col}}</th>
 				</tr>
 			</thead>
 			<tbody>
 				<tr  v-for="(row) in filteredRows" :key="row._id">
-					<td>{{row.claveMexpharm}}</td>
+					<td><button class="btn btn-sm btn-outline-danger"><delete-icon title="Edtar" /></button></td>
+					<td><button class="btn btn-sm btn-outline-info"><pencil-icon title="Eliminar" /></button></td>
+					<td class="text-info">{{row.claveMexpharm}}</td>
 					<td>{{row.claveInst}}</td>
 					<td>{{row.codigoVerificador}}</td>
 					<td>{{row.anyo}}</td>
