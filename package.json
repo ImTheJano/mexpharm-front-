@@ -21,7 +21,7 @@
     "bootstrap": "^4.3.1",
     "core-js": "^2.6.5",
     "datatables": "^1.10.18",
-    "datatables.net": "^1.10.20",
+    "datatables.net": "^1.10.22",
     "file-saver": "^2.0.2",
     "fs": "0.0.1-security",
     "jquery": "^3.4.1",
